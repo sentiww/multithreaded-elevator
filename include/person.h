@@ -14,6 +14,7 @@ class Person : public std::enable_shared_from_this<Person> {
 private:
     int y;
     int x;
+    int speed;
     char symbol;
     bool is_ready_to_ride = false;
     std::shared_ptr<SimulationContext> context;

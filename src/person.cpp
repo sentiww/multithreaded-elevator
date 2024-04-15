@@ -10,6 +10,7 @@ Person::Person(int index, std::shared_ptr<SimulationContext> context) {
     x = 0;
     y = 11 + (index % 2);
     symbol = ('A' + index) % 26 + 'A';
+    speed = rand() % 20;
     this->context = std::move(context);
     this->index = index;
 }
@@ -56,6 +57,7 @@ bool Person::walkingToElevator() const {
 
 void Person::walk() {
     x++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100 * speed));
 }
 
 bool Person::waitingForElevator() {
@@ -75,8 +77,7 @@ void Person::enterElevator() {
     setIsReadyToRide(false);
     int initial_x = x;
     while (x < initial_x + 2 + rand() % 2 && !context->getState()->getStopRequested()) {
-        x++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 500));
+        walk();
     }
     setIsReadyToRide(true);
 }
@@ -122,7 +123,7 @@ void Person::run() {
             waitForNextFloor();
         }
         else if (walkingFromElevator()) {
-            x++;
+            walk();
             if (leftElevator()) {
                 state->removeFromElevator(shared_from_this());
             }
@@ -135,7 +136,5 @@ void Person::run() {
         if (isAtServiceDesk()) {
             waitAtServiceDesk();
         }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 500));
     }
 }
