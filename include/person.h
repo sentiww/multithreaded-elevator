@@ -9,6 +9,7 @@
 #include "simulation_context.h"
 
 class SimulationContext;
+class SimulationState;
 
 class Person : public std::enable_shared_from_this<Person> {
 private:
@@ -18,6 +19,8 @@ private:
     char symbol;
     bool is_ready_to_ride = false;
     std::shared_ptr<SimulationContext> context;
+    std::shared_ptr<SimulationState> state;
+    std::shared_ptr<SimulationOptions> options;
     int index;
 
     bool walkingToElevator() const;

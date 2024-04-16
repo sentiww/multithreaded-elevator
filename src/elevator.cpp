@@ -4,14 +4,14 @@
 
 #include "../include/elevator.h"
 
-void Elevator::move_elevator() {
+void Elevator::moveElevator() {
     state->setElevatorY(state->getElevatorY() + 1);
     for (const std::shared_ptr<Person>& person : state->getPeopleInElevator()) {
         person->setY(person->getY() + 1);
     }
 }
 
-void Elevator::wait_until_people_enter() {
+void Elevator::waitUntilPeopleEnter() {
     while (!state->getPeopleThreadsJoined() && !state->getStopRequested()) {
         std::vector<std::shared_ptr<Person>> people = state->getPeopleInElevator();
         bool ready = true;
@@ -30,52 +30,52 @@ void Elevator::wait_until_people_enter() {
     }
 }
 
-void Elevator::stop_at_floor(Floor floor) {
-    int floor_position = get_floor_position(floor);
+void Elevator::stopAtFloor(Floor floor) {
+    int floor_position = getFloorPosition(floor);
     if (state->getElevatorY() == floor_position) {
         state->setCurrentFloor(floor);
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::seconds(options->getElevatorStopTime()));
     }
 }
 
-int Elevator::get_floor_position(Floor floor) {
+int Elevator::getFloorPosition(Floor floor) {
     switch (floor) {
         case Floor::Zero:
-            return floor_positions[0];
+            return state->getFloorPosition(Floor::Zero);
         case Floor::First:
-            return floor_positions[1];
+            return state->getFloorPosition(Floor::First);
         case Floor::Second:
-            return floor_positions[2];
+            return state->getFloorPosition(Floor::Second);
         case Floor::Third:
-            return floor_positions[3];
+            return state->getFloorPosition(Floor::Third);
         case Floor::None:
             break;
     }
     return -1;
 }
 
-void Elevator::wait_until_people_leave() {
+void Elevator::waitUntilPeopleLeave() {
     while (!state->getPeopleInElevator().empty() && !state->getStopRequested()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
-Floor Elevator::get_next_stop_floor() {
-    return static_cast<Floor>(rand() % 2 + 1);
+Floor Elevator::getNextStopFloor() {
+    return static_cast<Floor>(rand() % 3 + 1);
 }
 
-void Elevator::update_current_floor() {
-    int elevator_y = context->getState()->getElevatorY();
-    if (elevator_y == floor_positions[0]) {
+void Elevator::updateCurrentFloor() {
+    int elevator_y = state->getElevatorY();
+    if (elevator_y == state->getFloorPosition(Floor::Zero)) {
         state->setCurrentFloor(Floor::Zero);
     }
-    else if (elevator_y == floor_positions[1]) {
+    else if (elevator_y == state->getFloorPosition(Floor::First)) {
         state->setCurrentFloor(Floor::First);
     }
-    else if (elevator_y == floor_positions[2]) {
+    else if (elevator_y == state->getFloorPosition(Floor::Second)) {
         state->setCurrentFloor(Floor::Second);
     }
-    else if (elevator_y == floor_positions[3]) {
+    else if (elevator_y == state->getFloorPosition(Floor::Third)) {
         state->setCurrentFloor(Floor::Third);
     }
     else {
@@ -84,32 +84,29 @@ void Elevator::update_current_floor() {
 }
 
 void Elevator::run() {
-    std::shared_ptr<Window> window = context->getWindow();
     while (!state->getPeopleThreadsJoined() && !state->getStopRequested()) {
-        window->draw();
-
-        move_elevator();
-        update_current_floor();
+        moveElevator();
+        updateCurrentFloor();
 
         Floor current_floor = state->getCurrentFloor();
 
         if (current_floor == Floor::Zero) {
-            stop_at_floor(Floor::Zero);
+            stopAtFloor(Floor::Zero);
             state->setCurrentFloor(Floor::None);
-            wait_until_people_enter();
+            waitUntilPeopleEnter();
         }
         else if (current_floor == next_stop_floor) {
-            stop_at_floor(next_stop_floor);
-            wait_until_people_leave();
+            stopAtFloor(next_stop_floor);
+            waitUntilPeopleLeave();
         }
 
         state->setCurrentFloor(Floor::None);
 
-        if (state->getElevatorY() > 50) {
-            state->setElevatorY(0);
-            next_stop_floor = get_next_stop_floor();
+        if (state->getElevatorY() > options->getElevatorEndY()) {
+            state->setElevatorY(options->getElevatorStartY());
+            next_stop_floor = getNextStopFloor();
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds (250));
+        std::this_thread::sleep_for(std::chrono::milliseconds (options->getElevatorSpeed()));
     }
 }

@@ -7,45 +7,63 @@
 
 class SimulationOptions {
 private:
-    double minElevatorSpeed;
-    double maxElevatorSpeed;
-    double minPersonSpeed;
-    double maxPersonSpeed;
+    int elevatorSpeed;
+    int elevatorStartY;
+    int elevatorEndY;
+    int elevatorStopTime;
+    int personDespawnX;
+    int serviceDeskX;
     int leftCorridorLength;
     int rightCorridorLength;
-    int elevatorHeight;
+    int corridorWidth;
 
 public:
-    SimulationOptions& setMinElevatorSpeed(double speed){
-        minElevatorSpeed = speed;
+    SimulationOptions& setElevatorSpeed(int speed) {
+        elevatorSpeed = speed;
         return *this;
     }
-    [[nodiscard]] double getMinElevatorSpeed() const {
-        return minElevatorSpeed;
+    [[nodiscard]] int getElevatorSpeed() const {
+        return elevatorSpeed;
     }
 
-    SimulationOptions& setMaxElevatorSpeed(double speed) {
-        maxElevatorSpeed = speed;
+    SimulationOptions& setElevatorStartY(int y) {
+        elevatorStartY = y;
         return *this;
     }
-    [[nodiscard]] double getMaxElevatorSpeed() const {
-        return maxElevatorSpeed;
+    [[nodiscard]] int getElevatorStartY() const {
+        return elevatorStartY;
     }
 
-    SimulationOptions& setMinPersonSpeed(double speed) {
-        minPersonSpeed = speed;
+    SimulationOptions& setElevatorEndY(int y) {
+        elevatorEndY = y;
         return *this;
     }
-    [[nodiscard]] double getMinPersonSpeed() const {
-        return minPersonSpeed;
+    [[nodiscard]] int getElevatorEndY() const {
+        return elevatorEndY;
     }
 
-    SimulationOptions& setMaxPersonSpeed(double speed) {
-        maxPersonSpeed = speed;
+    SimulationOptions& setElevatorStopTime(int time) {
+        elevatorStopTime = time;
         return *this;
     }
-    [[nodiscard]] double getMaxPersonSpeed() const {
-        return maxPersonSpeed;
+    [[nodiscard]] int getElevatorStopTime() const {
+        return elevatorStopTime;
+    }
+
+    SimulationOptions& setPersonDespawnX(int x) {
+        personDespawnX = x;
+        return *this;
+    }
+    [[nodiscard]] int getPersonDespawnX() const {
+        return personDespawnX;
+    }
+
+    SimulationOptions& setServiceDeskX(int x) {
+        serviceDeskX = x;
+        return *this;
+    }
+    [[nodiscard]] int getServiceDeskX() const {
+        return serviceDeskX;
     }
 
     SimulationOptions& setLeftCorridorLength(int length) {
@@ -64,12 +82,12 @@ public:
         return rightCorridorLength;
     }
 
-    SimulationOptions& setElevatorHeight(int height) {
-        elevatorHeight = height;
+    SimulationOptions& setCorridorWidth(int width) {
+        corridorWidth = width;
         return *this;
     }
-    [[nodiscard]] int getElevatorHeight() const {
-        return elevatorHeight;
+    [[nodiscard]] int getCorridorWidth() const {
+        return corridorWidth;
     }
 };
 

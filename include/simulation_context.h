@@ -18,19 +18,19 @@ class Window;
 
 class SimulationContext : public std::enable_shared_from_this<SimulationContext> {
 private:
-    std::unique_ptr<SimulationOptions> options;
+    std::shared_ptr<SimulationOptions> options;
     std::shared_ptr<SimulationState> state;
     std::shared_ptr<Window> window;
 
     std::vector<std::thread> people_threads;
     std::thread elevator_thread;
 
-    void create_people_threads();
-    void create_elevator_thread();
-    void join_threads();
+    void createPeopleThreads();
+    void createElevatorThread();
+    void joinThreads();
 
 public:
-    SimulationContext(std::unique_ptr<SimulationOptions> options);
+    explicit SimulationContext(std::shared_ptr<SimulationOptions> options);
 
     void run();
 
@@ -38,8 +38,8 @@ public:
         return state;
     }
 
-    std::shared_ptr<Window> getWindow() {
-        return window;
+    std::shared_ptr<SimulationOptions> getOptions() {
+        return options;
     }
 };
 

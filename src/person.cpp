@@ -7,12 +7,14 @@
 #include <thread>
 
 Person::Person(int index, std::shared_ptr<SimulationContext> context) {
-    x = 0;
-    y = 11 + (index % 2);
-    symbol = ('A' + index) % 26 + 'A';
-    speed = rand() % 20;
     this->context = std::move(context);
+    this->state = this->context->getState();
+    this->options = this->context->getOptions();
     this->index = index;
+    this->x = 0;
+    this->y = 11 + (index % this->options->getCorridorWidth());
+    this->symbol = ('A' + index) % 26 + 'A';
+    this->speed = rand() % 20;
 }
 
 Person& Person::setY(int y) {
@@ -52,7 +54,7 @@ int Person::getIndex() const {
 }
 
 bool Person::walkingToElevator() const {
-    return x < 19;
+    return x < options->getLeftCorridorLength() - 1;
 }
 
 void Person::walk() {
@@ -61,7 +63,7 @@ void Person::walk() {
 }
 
 bool Person::waitingForElevator() {
-    return x == 19 && context->getState()->getCurrentFloor() != Floor::Zero;
+    return x == options->getLeftCorridorLength() - 1 && state->getCurrentFloor() != Floor::Zero;
 }
 
 void Person::waitForElevator() {
@@ -69,39 +71,42 @@ void Person::waitForElevator() {
 }
 
 bool Person::isReadyToEnterElevator() {
-    return x == 19 && context->getState()->getCurrentFloor() == Floor::Zero;
+    const int elevatorDoorWidth = 1;
+    return x == options->getLeftCorridorLength() - elevatorDoorWidth && state->getCurrentFloor() == Floor::Zero;
 }
 
 void Person::enterElevator() {
-    context->getState()->addToElevator(shared_from_this());
+    state->addToElevator(shared_from_this());
     setIsReadyToRide(false);
     int initial_x = x;
-    while (x < initial_x + 2 + rand() % 2 && !context->getState()->getStopRequested()) {
+    while (x < initial_x + 2 + rand() % options->getCorridorWidth() && !state->getStopRequested()) {
         walk();
     }
     setIsReadyToRide(true);
 }
 
 void Person::waitForNextFloor() {
-    while (atZeroOrNoneFloor() && !context->getState()->getStopRequested()) {
+    while (atZeroOrNoneFloor() && !state->getStopRequested()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
 bool Person::atZeroOrNoneFloor() const {
-    return context->getState()->getCurrentFloor() == Floor::Zero || context->getState()->getCurrentFloor() == Floor::None;
+    return state->getCurrentFloor() == Floor::Zero || state->getCurrentFloor() == Floor::None;
 }
 
 bool Person::walkingFromElevator() const {
-    return x > 19 && x < 40;
+    const int elevatorDoorWidth = 1;
+    return x > options->getLeftCorridorLength() - elevatorDoorWidth && x < options->getPersonDespawnX();
 }
 
 bool Person::leftElevator() const {
-    return x == 23;
+    const int elevatorDoorsWidth = 2;
+    return x == options->getLeftCorridorLength() + elevatorDoorsWidth + options->getCorridorWidth();
 }
 
 bool Person::isAtServiceDesk() const {
-    return x == 30;
+    return x == options->getServiceDeskX();
 }
 
 void Person::waitAtServiceDesk() {
@@ -109,9 +114,7 @@ void Person::waitAtServiceDesk() {
 }
 
 void Person::run() {
-    auto state = context->getState();
     while (!state->getStopRequested()) {
-        context->getWindow()->draw();
         if (walkingToElevator()) {
             walk();
         }

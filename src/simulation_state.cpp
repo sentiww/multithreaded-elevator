@@ -4,14 +4,6 @@
 
 #include "../include/simulation_state.h"
 
-SimulationState& SimulationState::setElevatorPresent(bool elevator_present) {
-    this->elevator_present = elevator_present;
-    return *this;
-}
-bool SimulationState::getElevatorPresent() const {
-    return elevator_present;
-}
-
 SimulationState& SimulationState::setPeopleThreadsJoined(bool people_threads_joined) {
     this->people_threads_joined = people_threads_joined;
     return *this;
@@ -26,6 +18,14 @@ SimulationState& SimulationState::setCurrentFloor(Floor current_floor) {
 }
 Floor SimulationState::getCurrentFloor() const {
     return current_floor;
+}
+
+SimulationState& SimulationState::setFloorPosition(Floor floor, int position) {
+    floor_positions[static_cast<int>(floor)] = position;
+    return *this;
+}
+int SimulationState::getFloorPosition(Floor floor) const {
+    return floor_positions[static_cast<int>(floor)];
 }
 
 SimulationState& SimulationState::setElevatorY(int y) {

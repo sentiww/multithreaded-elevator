@@ -5,24 +5,29 @@
 #include "../include/simulation_context.h"
 #include "../include/elevator.h"
 #include <memory>
+#include <utility>
 
-SimulationContext::SimulationContext(std::unique_ptr<SimulationOptions> options) {
+SimulationContext::SimulationContext(std::shared_ptr<SimulationOptions> options) {
     this->options = std::move(options);
-    this->state = std::make_unique<SimulationState>();
-    state->setElevatorPresent(false)
-          .setElevatorX(20)
-          .setElevatorY(0)
-          .setPeopleThreadsJoined(false);
-    this->window = std::make_shared<Window>(state);
+    this->state = std::make_shared<SimulationState>();
+    this->state->setElevatorX(this->options->getLeftCorridorLength())
+          .setElevatorY(this->options->getElevatorStartY())
+          .setPeopleThreadsJoined(false)
+          .setFloorPosition(Floor::Zero, 10)
+          .setFloorPosition(Floor::First, 20)
+          .setFloorPosition(Floor::Second, 30)
+          .setFloorPosition(Floor::Third, 40);
+    this->window = std::make_shared<Window>(this->state, this->options);
+    this->window->startUiThread();
 }
 
 void SimulationContext::run() {
-    create_elevator_thread();
-    create_people_threads();
-    join_threads();
+    createElevatorThread();
+    createPeopleThreads();
+    joinThreads();
 }
 
-void SimulationContext::create_people_threads() {
+void SimulationContext::createPeopleThreads() {
     for (int i = 0; !this->state->getStopRequested(); i++) {
         std::shared_ptr<Person> person = std::make_shared<Person>(i, shared_from_this());
         state->addPerson(person);
@@ -34,14 +39,14 @@ void SimulationContext::create_people_threads() {
     }
 }
 
-void SimulationContext::create_elevator_thread() {
+void SimulationContext::createElevatorThread() {
     elevator_thread = std::thread([this]() {
         Elevator elevator(shared_from_this());
         elevator.run();
     });
 }
 
-void SimulationContext::join_threads() {
+void SimulationContext::joinThreads() {
     for (auto &thread : people_threads) {
         if (thread.joinable()) {
             thread.join();
@@ -52,4 +57,6 @@ void SimulationContext::join_threads() {
     if (elevator_thread.joinable()) {
         elevator_thread.join();
     }
+
+    window->joinUiThread();
 }

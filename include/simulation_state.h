@@ -15,9 +15,9 @@ class Person;
 
 class SimulationState {
 private:
-    bool elevator_present = false;
     bool people_threads_joined = false;
     Floor current_floor = Floor::None;
+    int floor_positions[4];
     int elevator_y;
     int elevator_x;
     std::vector<std::shared_ptr<Person>> people = std::vector<std::shared_ptr<Person>>();
@@ -25,14 +25,14 @@ private:
     std::stop_source stop_source = std::stop_source();
 
 public:
-    SimulationState& setElevatorPresent(bool elevator_present);
-    [[nodiscard]] bool getElevatorPresent() const;
-
     SimulationState& setPeopleThreadsJoined(bool people_threads_joined);
     [[nodiscard]] bool getPeopleThreadsJoined() const;
 
     SimulationState& setCurrentFloor(Floor current_floor);
     [[nodiscard]] Floor getCurrentFloor() const;
+
+    SimulationState& setFloorPosition(Floor floor, int position);
+    [[nodiscard]] int getFloorPosition(Floor floor) const;
 
     SimulationState& setElevatorY(int y);
     [[nodiscard]] int getElevatorY() const;
