@@ -113,6 +113,17 @@ void Person::waitAtServiceDesk() {
     std::this_thread::sleep_for(std::chrono::seconds(2));
 }
 
+Floor Person::getFloor() const {
+    if (20 <= y && y < 30) {
+        return Floor::First;
+    } else if (30 <= y && y < 40) {
+        return Floor::Second;
+    } else if (40 <= y && y < 50) {
+        return Floor::Third;
+    }
+    return Floor::None;
+}
+
 void Person::run() {
     while (!state->getStopRequested()) {
         if (walkingToElevator()) {
@@ -137,7 +148,15 @@ void Person::run() {
         }
 
         if (isAtServiceDesk()) {
+            auto floor = getFloor();
+            auto lane = this->y % options->getCorridorWidth();
+            auto mutex = context->getServiceDeskMutex(floor, lane);
+            if (floor == Floor::None) {
+                break;
+            }
+            mutex->lock();
             waitAtServiceDesk();
+            mutex->unlock();
         }
     }
 }

@@ -12,6 +12,7 @@
 #include <thread>
 #include <vector>
 #include <memory>
+#include <map>
 
 class SimulationState;
 class Window;
@@ -24,6 +25,7 @@ private:
 
     std::vector<std::thread> people_threads;
     std::thread elevator_thread;
+    std::map<Floor, std::map<int, std::shared_ptr<std::mutex>>> service_desk_mutexes;
 
     void createPeopleThreads();
     void createElevatorThread();
@@ -40,6 +42,10 @@ public:
 
     std::shared_ptr<SimulationOptions> getOptions() {
         return options;
+    }
+
+    std::shared_ptr<std::mutex> getServiceDeskMutex(Floor floor, int lane) {
+        return service_desk_mutexes[floor][lane];
     }
 };
 

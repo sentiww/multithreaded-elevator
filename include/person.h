@@ -35,6 +35,7 @@ private:
     bool leftElevator() const;
     bool isAtServiceDesk() const;
     static void waitAtServiceDesk();
+    Floor getFloor() const;
 
 public:
     Person(int index, std::shared_ptr<SimulationContext> context);

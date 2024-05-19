@@ -6,6 +6,7 @@
 #include "../include/elevator.h"
 #include <memory>
 #include <utility>
+#include <mutex>
 
 SimulationContext::SimulationContext(std::shared_ptr<SimulationOptions> options) {
     this->options = std::move(options);
@@ -17,6 +18,12 @@ SimulationContext::SimulationContext(std::shared_ptr<SimulationOptions> options)
           .setFloorPosition(Floor::First, 20)
           .setFloorPosition(Floor::Second, 30)
           .setFloorPosition(Floor::Third, 40);
+    for (auto floor = 1; floor <= 3; floor++) {
+        this->service_desk_mutexes[static_cast<Floor>(floor)] = std::map<int, std::shared_ptr<std::mutex>>();
+        for (auto lane = 0; lane < this->options->getCorridorWidth(); lane++) {
+            this->service_desk_mutexes[static_cast<Floor>(floor)][lane] = std::make_shared<std::mutex>();
+        }
+    }
     this->window = std::make_shared<Window>(this->state, this->options);
     this->window->startUiThread();
 }
